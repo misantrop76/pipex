@@ -6,7 +6,7 @@
 /*   By: mminet <mminet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/11 13:36:25 by mminet            #+#    #+#             */
-/*   Updated: 2024/03/11 15:31:50 by mminet           ###   ########.fr       */
+/*   Updated: 2024/04/11 15:31:08 by mminet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ static char	**mktab(char const *s, char c, char **tab)
 			tab[i++][j] = '\0';
 		j = 0;
 	}
-	tab[i] = 0;
+	tab[i] = NULL;
 	return (tab);
 }
 
