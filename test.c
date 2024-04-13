@@ -30,33 +30,38 @@ int main(int argc, char *argv[]) {
         }
 
         if (pid == 0) { // Processus enfant
-            // Gestion des redirections des pipes
+            // Redirection de l'entrée standard si ce n'est pas la première commande
             if (i > 0) {
-                dup2(pipes[i - 1][0], STDIN_FILENO); // Redirection de l'entrée standard
-                close(pipes[i - 1][1]); // Fermeture de l'extrémité d'écriture du pipe précédent
+                dup2(pipes[i - 1][0], STDIN_FILENO);
+                close(pipes[i - 1][1]);
             }
 
+            // Redirection de la sortie standard si ce n'est pas la dernière commande
             if (i < num_cmds - 1) {
-                dup2(pipes[i][1], STDOUT_FILENO); // Redirection de la sortie standard
-                close(pipes[i][0]); // Fermeture de l'extrémité de lecture du pipe actuel
+                dup2(pipes[i][1], STDOUT_FILENO);
+                close(pipes[i][0]);
+            }
+
+            // Fermeture des descripteurs de fichiers inutilisés
+            for (int j = 0; j < num_cmds - 1; j++) {
+                close(pipes[j][0]);
+                close(pipes[j][1]);
             }
 
             // Exécution de la commande
             execlp(argv[i + 1], argv[i + 1], NULL);
             perror("execlp");
             exit(EXIT_FAILURE);
+        } else { // Processus parent
+            // Fermeture du descripteur de fichier d'entrée si ce n'est pas la première commande
+            if (i > 0) {
+                close(pipes[i - 1][0]);
+                close(pipes[i - 1][1]);
+            }
+
+            // Attente de la fin du processus enfant
+            wait(NULL);
         }
-    }
-
-    // Fermeture de tous les descripteurs de fichiers inutilisés par le processus parent
-    for (int i = 0; i < num_cmds - 1; i++) {
-        close(pipes[i][0]); // Fermeture de l'extrémité de lecture du pipe
-        close(pipes[i][1]); // Fermeture de l'extrémité d'écriture du pipe
-    }
-
-    // Attente de la fin de tous les processus enfants
-    for (int i = 0; i < num_cmds; i++) {
-        wait(NULL);
     }
 
     return 0;
