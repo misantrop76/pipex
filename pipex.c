@@ -6,7 +6,7 @@
 /*   By: mminet <mminet@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/14 19:24:59 by mminet            #+#    #+#             */
-/*   Updated: 2024/04/14 19:38:38 by mminet           ###   ########.fr       */
+/*   Updated: 2024/04/15 18:29:54 by mminet           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ void	my_exec(char *arg, char **env)
 	exit(127);
 }
 
-void	do_pipe(char *cmd, char **env, int *status)
+void	do_pipe(char *cmd, char **env, t_pipex *pipex, int i)
 {
 	pid_t	pid;
 	int		p_fd[2];
@@ -52,23 +52,25 @@ void	do_pipe(char *cmd, char **env, int *status)
 	if (!pid)
 	{
 		close(p_fd[0]);
-		dup2(p_fd[1], STDOUT_FILENO);
+		if (i)
+			dup2(p_fd[1], STDOUT_FILENO);
 		close(p_fd[1]);
 		my_exec(cmd, env);
 	}
 	else
 	{
+		pipex->last_pid = pid;
 		close(p_fd[1]);
-		dup2(p_fd[0], STDIN_FILENO);
+		if (i)
+			dup2(p_fd[0], STDIN_FILENO);
 		close(p_fd[0]);
-		waitpid(pid, status, 0);
 	}
 }
 
 int	main(int ac, char **av, char **env)
 {
 	int		i;
-	t_pipex pipex;
+	t_pipex	pipex;
 
 	if (ac != 5)
 		usage();
@@ -77,10 +79,16 @@ int	main(int ac, char **av, char **env)
 	pipex.fd_in = open_file(av[1], 2, &i);
 	dup2(pipex.fd_in, STDIN_FILENO);
 	if (i == 2)
-		do_pipe(av[i], env, &pipex.status);
+		do_pipe(av[i], env, &pipex, 1);
+	if (access(av[ac - 1], W_OK))
+		exit(EXIT_FAILURE);
 	dup2(pipex.fd_out, STDOUT_FILENO);
-	my_exec(av[ac - 2], env);
-	exit(pipex.status);
+	do_pipe(av[ac - 2], env, &pipex, 0);
+	waitpid(pipex.last_pid, &pipex.status, 0);
+	//wait(NULL);
 	close(pipex.fd_in);
 	close(pipex.fd_out);
+	if (pipex.status)
+		exit(pipex.status >> 8);
+	exit(EXIT_SUCCESS);
 }

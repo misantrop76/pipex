@@ -6,7 +6,7 @@
 #    By: mminet <mminet@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/01 14:38:14 by mminet            #+#    #+#              #
-#    Updated: 2024/04/14 19:49:05 by mminet           ###   ########.fr        #
+#    Updated: 2024/04/15 12:24:36 by mminet           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -57,12 +57,12 @@ SRCS_L =	libft/ft_atoi.c\
 			libft/ft_toupper.c\
 
 SRCS =	pipex.c\
-		get_next_line.c\
+		get_line.c\
 		pipex_utils.c\
 
 SRCS_B = 	pipex_bonus.c\
 			pipex_utils_bonus.c\
-			get_next_line.c\
+			get_line.c\
 
 NAME = pipex
 
